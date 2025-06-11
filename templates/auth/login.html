@@ -1,0 +1,101 @@
+{% extends 'base_auth.html' %}
+
+{% block title %}Login - School Management System{% endblock %}
+
+{% block form_title %}
+<div class="text-center mb-5">
+  <h1 class="h3 font-weight-bold mb-4">Welcome Back</h1>
+  <p class="text-muted">Please sign in to continue to your account</p>
+</div>
+{% endblock %}
+{% block content %}
+<form method="POST" action="{% url 'schoolmanagement:login' %}" class="needs-validation" novalidate>
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="id_username" class="form-label">Username</label>
+    <input type="text" class="form-control" id="id_username" name="username" required>
+    <div class="invalid-feedback">
+      Please enter your username
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="id_password" class="form-label">Password</label>
+    <input type="password" class="form-control" id="id_password" name="password" required>
+    <div class="invalid-feedback">
+      Please enter your password
+    </div>
+  </div>
+{% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% elif message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+          <div>{{ message }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="d-grid gap-3">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="fas fa-sign-in-alt me-2"></i> Sign In
+    </button>
+    <div class="divider my-2">
+      <span class="px-3 bg-white text-muted">or continue with</span>
+    </div>
+   
+  </div>
+</form>
+{% endblock %}
+
+{% block form_footer %}
+<div class="text-center mt-4">
+  <p class="mb-0">
+    Don't have an account?
+    <a href="{% url 'schoolmanagement:register_student' %}" class="fw-semibold text-decoration-none">
+      Create an account
+    </a>
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle password visibility
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleButtons = document.querySelectorAll('.toggle-password');
+  
+  toggleButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const input = this.closest('.input-group').querySelector('input');
+      const icon = this.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        this.setAttribute('aria-label', 'Hide password');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        this.setAttribute('aria-label', 'Show password');
+      }
+    });
+  });
+  
+  // Add Bootstrap's validation classes
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+});
+</script>
+{% endblock %}

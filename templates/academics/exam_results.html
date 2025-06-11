@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .results-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .exam-header {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+    }
+    .grade-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+    }
+    .grade-A { background-color: #28a745; color: white; }
+    .grade-B { background-color: #17a2b8; color: white; }
+    .grade-C { background-color: #ffc107; color: black; }
+    .grade-F { background-color: #dc3545; color: white; }
+    .stats-card {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Exam Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="exam-header">
+                <h4>{{ exam.name }}</h4>
+                <p class="mb-0">
+                    <span class="badge bg-light text-dark">{{ exam.get_exam_type_display }}</span>
+                    <span class="badge bg-light text-dark">{{ exam.subject.name }}</span>
+                    <span class="badge bg-light text-dark">{{ exam.class_level.name }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Average Score</h5>
+                <div class="stats-number">{{ exam.average_score|floatformat:2 }}</div>
+                <p class="mb-0">Out of {{ exam.total_marks }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Pass Rate</h5>
+                <div class="stats-number">{{ exam.pass_rate|floatformat:1 }}%</div>
+                <p class="mb-0">{{ exam.passed_students }}/{{ exam.total_students }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Highest Score</h5>
+                <div class="stats-number">{{ exam.highest_score }}</div>
+                <p class="mb-0">{{ exam.top_student.get_full_name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="results-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Student Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Marks Obtained</th>
+                                    <th>Grade</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in exam_results %}
+                                <tr>
+                                    <td>{{ result.student.get_full_name }}</td>
+                                    <td>{{ result.marks_obtained }}</td>
+                                    <td>
+                                        <span class="grade-badge grade-{{ result.get_grade }}">
+                                            {{ result.get_grade_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ result.percentage|floatformat:1 }}%</td>
+                                    <td>
+                                        {% if result.is_passed %}
+                                            <span class="badge bg-success">Passed</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Failed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add tooltips for grade badges
+    const gradeBadges = document.querySelectorAll('.grade-badge');
+    gradeBadges.forEach(badge => {
+        new bootstrap.Tooltip(badge, {
+            title: badge.textContent,
+            placement: 'top'
+        });
+    });
+});
+</script>
+{% endblock %}

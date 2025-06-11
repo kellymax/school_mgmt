@@ -1,0 +1,311 @@
+{% extends 'guardian/base_guardian.html' %}
+
+{% block title %}{{ student.user.get_full_name }} - Exam Results{% endblock %}
+
+{% block breadcrumb %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'student_detail' student.id %}">{{ student.user.get_short_name }}</a></li>
+<li class="breadcrumb-item active">Exam Results</li>
+{% endblock %}
+
+{% block guardian_content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div class="mb-3 mb-md-0">
+                        <h5 class="card-title mb-1">Exam Results</h5>
+                        <p class="text-muted mb-0">Performance overview for {{ student.user.get_full_name }}</p>
+                    </div>
+                    <div class="d-flex
+                    <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+                        <i class="fas fa-filter me-1"></i> Filters
+                    </button>
+                    <a href="{% url 'exam_results' student.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync-alt me-1"></i> Reset
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="collapse" id="filtersCollapse">
+                <div class="card-body border-top">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="subject" class="form-label">Subject</label>
+                            <select name="subject" id="subject" class="form-select">
+                                <option value="">All Subjects</option>
+                                {% for subj in subjects %}
+                                    <option value="{{ subj.id }}" {% if subj.id == selected_subject|add:0 %}selected{% endif %}>
+                                        {{ subj.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exam_type" class="form-label">Exam Type</label>
+                            <select name="exam_type" id="exam_type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="quiz" {% if selected_exam_type == 'quiz' %}selected{% endif %}>Quiz</option>
+                                <option value="midterm" {% if selected_exam_type == 'midterm' %}selected{% endif %}>Mid-Term</option>
+                                <option value="final" {% if selected_exam_type == 'final' %}selected{% endif %}>Final Exam</option>
+                                <option value="test" {% if selected_exam_type == 'test' %}selected{% endif %}>Test</option>
+                                <option value="assignment" {% if selected_exam_type == 'assignment' %}selected{% endif %}>Assignment</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Performance Summary -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="avatar-sm rounded-circle bg-soft-primary d-flex align-items-center justify-content-center">
+                        <i class="fas fa-chart-line fa-2x text-primary"></i>
+                    </div>
+                </div>
+                <h3 class="mb-1">{{ overall_avg|floatformat:1 }}%</h3>
+                <p class="text-muted mb-0">Average Score</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="avatar-sm rounded-circle bg-soft-success d-flex align-items-center justify-content-center">
+                        <i class="fas fa-medal fa-2x text-success"></i>
+                    </div>
+                </div>
+                <h3 class="mb-1">{{ page_obj.paginator.count }}</h3>
+                <p class="text-muted mb-0">Total Exams</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="avatar-sm rounded-circle bg-soft-info d-flex align-items-center justify-content-center">
+                        <i class="fas fa-book fa-2x text-info"></i>
+                    </div>
+                </div>
+                <h3 class="mb-1">{{ subjects|length }}</h3>
+                <p class="text-muted mb-0">Subjects</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="avatar-sm rounded-circle bg-soft-warning d-flex align-items-center justify-content-center">
+                        <i class="fas fa-trophy fa-2x text-warning"></i>
+                    </div>
+                </div>
+                <h3 class="mb-1">A</h3>
+                <p class="text-muted mb-0">Current Grade</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card mb-4">
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Exam</th>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in page_obj %}
+                    <tr>
+                        <td>
+                            <a href="#" data-bs-toggle="tooltip" title="{{ result.exam.description|default:'No description' }}">
+                                {{ result.exam.name }}
+                            </a>
+                        </td>
+                        <td>{{ result.exam.subject.name }}</td>
+                        <td>
+                            <span class="badge bg-soft-{{ result.exam.exam_type|lower }}">
+                                {{ result.exam.get_exam_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ result.exam.date|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                    <div class="progress-bar bg-{{ result.grade|lower }}" role="progressbar" 
+                                         style="width: {{ result.percentage }}%" 
+                                         aria-valuenow="{{ result.percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"></div>
+                                </div>
+                                <span class="fw-medium">{{ result.marks_obtained }}/{{ result.exam.max_marks }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ result.grade|lower }}">
+                                {{ result.grade }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-soft-{{ result.grade|lower }} text-{{ result.grade|lower }}">
+                                {{ result.remarks|default:"-" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_exam_type %}&exam_type={{ selected_exam_type }}{% endif %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_exam_type %}&exam_type={{ selected_exam_type }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_exam_type %}&exam_type={{ selected_exam_type }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_exam_type %}&exam_type={{ selected_exam_type }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_exam_type %}&exam_type={{ selected_exam_type }}{% endif %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+            <h5>No exam results found</h5>
+            <p class="text-muted">There are no exam results available for this student yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Performance Chart -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Performance Trend</h5>
+    </div>
+    <div class="card-body
+    <div class="chart-container" style="position: relative; height: 300px;">
+        <canvas id="performanceChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Auto-submit form when filters change
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form submission on filter change
+        const filterForm = document.querySelector('#filtersCollapse form');
+        if (filterForm) {
+            const selects = filterForm.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    filterForm.submit();
+                });
+            });
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize performance chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Average Score (%)',
+                    data: [65, 59, 80, 81, 76, 85, 90, 88, 84, 82, 85, 87],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Score (%)'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

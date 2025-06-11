@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+    .recent-activities {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .table {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Student Info -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Student Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-person"></i> {{ student.get_full_name }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-book"></i> Class: {{ student.current_class }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-calendar3"></i> Date of Birth: {{ student.date_of_birth }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-envelope"></i> Email: {{ student.user.email }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Upcoming Fees</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fee Type</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in upcoming_fees %}
+                                <tr>
+                                    <td>{{ fee.description }}</td>
+                                    <td>{{ fee.amount }}</td>
+                                    <td>{{ fee.due_date }}</td>
+                                    <td>
+                                        {% if fee.due_date < today %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Due Soon</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Exams -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Exams</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Exam Name</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exam in recent_exams %}
+                                <tr>
+                                    <td>{{ exam.name }}</td>
+                                    <td>{{ exam.subject }}</td>
+                                    <td>{{ exam.date }}</td>
+                                    <td>
+                                        {% with result=exam.examresult_set.get.student.student %}
+                                            {{ result.marks_obtained }}
+                                        {% endwith %}
+                                    </td>
+                                    <td>
+                                        {% with result=exam.examresult_set.get.student.student %}
+                                            {% if result.marks_obtained >= exam.passing_marks %}
+                                                <span class="badge bg-success">Pass</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Fail</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

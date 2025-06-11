@@ -1,0 +1,237 @@
+{% extends 'base_auth.html' %}
+
+{% block title %}Student Registration - School Management System{% endblock %}
+
+{% block form_title %}
+<div class="text-center mb-5">
+  <h1 class="h3 font-weight-bold mb-2">Create Student Account</h1>
+  <p class="text-muted">Fill in the form below to register as a student</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+  {% csrf_token %}
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% elif message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+          <div>{{ message }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- Student Information -->
+    <div class="col-12">
+      <h6 class="fw-semibold mb-3">
+        <i class="fas fa-user-graduate me-2"></i> Student Information
+      </h6>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="text" class="form-control" id="full_name" name="full_name" 
+               placeholder="Full Name" value="{{ values.full_name|default:'' }}" required>
+        <label for="full_name">Full Name <span class="text-danger">*</span></label>
+        <div class="invalid-feedback">
+          Please enter the student's full name
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+               value="{{ values.date_of_birth|default:'' }}" required>
+        <label for="date_of_birth">Date of Birth <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <select class="form-select" id="gender" name="gender" required>
+          <option value="" disabled selected>Select Gender</option>
+          <option value="M" {% if values.gender == 'M' %}selected{% endif %}>Male</option>
+          <option value="F" {% if values.gender == 'F' %}selected{% endif %}>Female</option>
+        </select>
+        <label for="gender">Gender <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <div class="col-12">
+      <div class="form-floating">
+        <textarea class="form-control" id="address" name="address" 
+                  placeholder="Address" style="height: 100px" required>{{ values.address|default:'' }}</textarea>
+        <label for="address">Address <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <!-- Parent/Guardian Information -->
+    <div class="col-12 mt-4">
+      <h6 class="fw-semibold mb-3">
+        <i class="fas fa-users me-2"></i> Parent/Guardian Information
+      </h6>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="text" class="form-control" id="parent_name" name="parent_name" 
+               placeholder="Parent/Guardian Name" value="{{ values.parent_name|default:'' }}" required>
+        <label for="parent_name">Parent/Guardian Name <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="tel" class="form-control" id="parent_phone" name="parent_phone" 
+               placeholder="Phone Number" value="{{ values.parent_phone|default:'' }}" required>
+        <label for="parent_phone">Phone Number <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <!-- Documents -->
+    <div class="col-12 mt-4">
+      <h6 class="fw-semibold mb-3">
+        <i class="fas fa-file-alt me-2"></i> Documents
+      </h6>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="photo" class="form-label">
+          Student Photo <span class="text-danger">*</span>
+          <small class="text-muted d-block">(Max. 2MB, JPG/PNG)</small>
+        </label>
+        <input type="file" class="form-control" id="photo" name="photo" required 
+               accept="image/jpeg, image/png">
+        <div class="form-text">A clear headshot photo is required</div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="birth_certificate" class="form-label">
+          Birth Certificate/Student ID
+          <small class="text-muted d-block">(Optional, PDF/Image, Max. 5MB)</small>
+        </label>
+        <input type="file" class="form-control" id="birth_certificate" 
+               name="birth_certificate" accept=".pdf, image/*">
+      </div>
+    </div>
+    
+    <!-- Account Information -->
+    <div class="col-12 mt-4">
+      <h6 class="fw-semibold mb-3">
+        <i class="fas fa-user-lock me-2"></i> Account Information
+      </h6>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="text" class="form-control" id="username" name="username" 
+               placeholder="Username" value="{{ values.username|default:'' }}" required>
+        <label for="username">Username <span class="text-danger">*</span></label>
+        <div class="form-text">Choose a unique username</div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="email" class="form-control" id="email" name="email" 
+               placeholder="Email" value="{{ values.email|default:'' }}" required>
+        <label for="email">Email <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="password" class="form-control" id="password1" name="password1" 
+               placeholder="Password" required>
+        <label for="password1">Password <span class="text-danger">*</span></label>
+        <div class="form-text">At least 8 characters with numbers & symbols</div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-floating">
+        <input type="password" class="form-control" id="password2" name="password2" 
+               placeholder="Confirm Password" required>
+        <label for="password2">Confirm Password <span class="text-danger">*</span></label>
+      </div>
+    </div>
+    
+    <!-- Terms and Conditions -->
+    <div class="col-12">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="terms" required>
+        <label class="form-check-label small" for="terms">
+          I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and 
+          <a href="#" class="text-decoration-none">Privacy Policy</a>
+        </label>
+        <div class="invalid-feedback">
+          You must agree before submitting.
+        </div>
+      </div>
+    </div>
+    
+    <!-- Submit Button -->
+    <div class="col-12 mt-4">
+      <button type="submit" class="btn btn-primary btn-lg w-100">
+        <i class="fas fa-user-plus me-2"></i> Create Account
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block form_footer %}
+<div class="text-center mt-4">
+  <p class="mb-0">
+    Already have an account? 
+    <a href="{% url 'schoolmanagement:login' %}" class="fw-semibold text-decoration-none">
+      Sign in here
+    </a>
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+(function () {
+  'use strict'
+  
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  const forms = document.querySelectorAll('.needs-validation')
+  
+  // Loop over them and prevent submission
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+
+// File input labels
+const fileInputs = document.querySelectorAll('.form-control[type="file"]');
+fileInputs.forEach(input => {
+  input.addEventListener('change', function(e) {
+    const fileName = this.files[0]?.name || 'Choose file';
+    const label = this.nextElementSibling;
+    if (label && label.classList.contains('custom-file-label')) {
+      label.textContent = fileName;
+    }
+  });
+});
+</script>
+{% endblock %}

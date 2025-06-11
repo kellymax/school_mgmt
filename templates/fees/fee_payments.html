@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .payments-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .payment-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+    }
+    .status-paid { background-color: #28a745; color: white; }
+    .status-pending { background-color: #ffc107; color: black; }
+    .status-overdue { background-color: #dc3545; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Fee Payments</h4>
+                <form method="GET" class="d-flex" style="gap: 1rem;">
+                    <input type="text" class="form-control" name="search" placeholder="Search by student name..." value="{{ request.GET.search }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="payments-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Payments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Class</th>
+                                    <th>Fee Structure</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Payment Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.student.get_full_name }}</td>
+                                    <td>{{ payment.student.current_class }}</td>
+                                    <td>{{ payment.fee_structure.description }}</td>
+                                    <td>{{ payment.amount }}</td>
+                                    <td>{{ payment.fee_structure.due_date }}</td>
+                                    <td>{{ payment.payment_date }}</td>
+                                    <td>
+                                        {% if payment.payment_date %}
+                                            <span class="payment-status status-paid">Paid</span>
+                                        {% elif payment.fee_structure.due_date < today %}
+                                            <span class="payment-status status-overdue">Overdue</span>
+                                        {% else %}
+                                            <span class="payment-status status-pending">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            {% if not payment.payment_date %}
+                                                <button type="button" class="btn btn-sm btn-success" 
+                                                        data-bs-toggle="modal" data-bs-target="#paymentModal{{ payment.id }}">
+                                                    Mark Paid
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Payment Modal -->
+                                <div class="modal fade" id="paymentModal{{ payment.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Mark Payment as Paid</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to mark this payment as paid?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{% url 'mark_payment' payment.id %}" method="POST" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-success">Mark as Paid</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const forms = document.querySelectorAll('form');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+});
+</script>
+{% endblock %}

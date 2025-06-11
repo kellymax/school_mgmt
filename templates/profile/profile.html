@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 20px auto;
+    }
+    .profile-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .profile-info {
+        margin-top: 20px;
+    }
+    .profile-info h5 {
+        margin-bottom: 10px;
+    }
+    .profile-info p {
+        margin-bottom: 5px;
+    }
+    .edit-profile {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <img src="{% if user.student %}{{ user.student.profile_picture.url }}{% elif user.staff %}{{ user.staff.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                     alt="Profile Picture" class="profile-image">
+            </div>
+            <div class="col-md-9">
+                <h3>{{ user.get_full_name }}</h3>
+                <p class="text-muted">{% if user.is_staff %}Administrator{% elif user.staff %}{{ user.staff.get_role_display }}{% elif user.student %}Student{% endif %}</p>
+                <p><i class="bi bi-envelope"></i> {{ user.email }}</p>
+                <p><i class="bi bi-phone"></i> {% if user.student %}{{ user.student.phone_number }}{% elif user.staff %}{{ user.staff.phone_number }}{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-info">
+        <h5>Profile Information</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <p>{{ user.first_name }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <p>{{ user.last_name }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <p>{{ user.email }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                {% if user.student %}
+                <div class="mb-3">
+                    <label class="form-label">Student ID</label>
+                    <p>{{ user.student.student_id }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Admission Number</label>
+                    <p>{{ user.student.admission_number }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Current Class</label>
+                    <p>{{ user.student.current_class }}</p>
+                </div>
+                {% elif user.staff %}
+                <div class="mb-3">
+                    <label class="form-label">Staff ID</label>
+                    <p>{{ user.staff.staff_id }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <p>{{ user.staff.get_role_display }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h5>Update Profile Picture</h5>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Upload New Profile Picture</label>
+                    <input type="file" class="form-control" name="profile_picture" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ student.user.get_full_name }} - Student Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Student Profile Header -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="text-center">
+                <img src="{% if student.profile_picture %}{{ student.profile_picture.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
+                     class="img-fluid rounded-circle mb-3" 
+                     alt="{{ student.user.get_full_name }}"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+                {% if is_own_profile %}
+                    <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-9">
+            <h2>{{ student.user.get_full_name }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-id-card"></i> {{ student.student_id }} | 
+                <i class="fas fa-envelope"></i> {{ student.user.email }} | 
+                <i class="fas fa-phone"></i> {{ student.phone_number|default:"N/A" }}
+            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Date of Birth:</strong> {{ student.date_of_birth|date:"F j, Y"|default:"N/A" }}</p>
+                    <p><strong>Gender:</strong> {{ student.get_gender_display|default:"N/A" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Admission Number:</strong> {{ student.admission_number|default:"N/A" }}</p>
+                    <p><strong>Address:</strong> {{ student.address|default:"N/A" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Attendance</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">{{ attendance_summary.present|default:0 }}/{{ attendance_summary.total|default:0 }}</h2>
+                        <div class="text-end">
+                            <div>Days Present</div>
+                            <small>{% if attendance_summary.total %}{{ attendance_summary.present|default:0|floatformat:0 }}{% else %}0{% endif %}%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Performance</h5>
+                    {% if recent_results %}
+                        {% with result=recent_results.0 %}
+                        <h4>{{ result.marks_obtained|default:0 }}/{{ result.exam.total_marks|default:0 }}</h4>
+                        <p class="mb-0">{{ result.exam.name }} - {{ result.grade|default:"N/A" }}</p>
+                        {% endwith %}
+                    {% else %}
+                        <p class="mb-0">No recent results</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Fee Status</h5>
+                    <h4>Ksh {{ fee_summary.total_paid|default:0 }}/{{ fee_summary.total_fees|default:0 }}</h4>
+                    <p class="mb-0">Balance: Ksh {{ fee_summary.balance|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="studentTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="classes-tab" data-bs-toggle="tab" data-bs-target="#classes" type="button" role="tab">
+                Classes & Subjects
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="guardians-tab" data-bs-toggle="tab" data-bs-target="#guardians" type="button" role="tab">
+                Guardians
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance" type="button" role="tab">
+                Performance
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content p-3 border border-top-0 rounded-bottom mb-4" id="studentTabsContent">
+        <!-- Classes & Subjects -->
+        <div class="tab-pane fade show active" id="classes" role="tabpanel">
+            <h4>Current Classes</h4>
+            {% if classes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Teacher</th>
+                                <th>Subjects</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for class in classes %}
+                            <tr>
+                                <td>{{ class.name|default:"N/A" }}</td>
+                                <td>
+                                    {% for teacher in class.teachers.all %}
+                                        {{ teacher.user.get_full_name|default:teacher.user.username }}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        No teacher assigned
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for subject in class.subjects.all %}
+                                        <span class="badge bg-primary">{{ subject.name|default:"N/A" }}</span>
+                                    {% empty %}
+                                        No subjects assigned
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No class information available.</div>
+            {% endif %}
+        </div>
+
+        <!-- Guardians -->
+        <div class="tab-pane fade" id="guardians" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Guardians</h4>
+                {% if is_own_profile or request.user.is_staff %}
+                    <a href="{% url 'add_guardian' student.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add Guardian
+                    </a>
+                {% endif %}
+            </div>
+            
+            {% if guardians %}
+                <div class="row">
+                    {% for guardian in guardians %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="card-title">{{ guardian.user.get_full_name|default:guardian.get_full_name|default:"N/A" }}</h5>
+                                    <span class="badge bg-secondary">{{ guardian.relationship|default:"Guardian" }}</span>
+                                </div>
+                                <p class="card-text">
+                                    <i class="fas fa-phone"></i> {{ guardian.phone|default:"N/A" }}<br>
+                                    <i class="fas fa-envelope"></i> {{ guardian.user.email|default:guardian.email|default:"N/A" }}
+                                </p>
+                                {% if guardian.profession %}
+                                    <p class="card-text"><i class="fas fa-briefcase"></i> {{ guardian.profession }}</p>
+                                {% endif %}
+                                {% if guardian.address %}
+                                    <p class="card-text"><i class="fas fa-map-marker-alt"></i> {{ guardian.address }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">No guardians have been added yet.</div>
+            {% endif %}
+        </div>
+
+        <!-- Performance -->
+        <div class="tab-pane fade" id="performance" role="tabpanel">
+            <h4>Recent Exam Results</h4>
+            {% if recent_results %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Exam</th>
+                                <th>Subject</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in recent_results %}
+                            <tr>
+                                <td>{{ result.exam.name|default:"N/A" }}</td>
+                                <td>{{ result.exam.subject.name|default:"N/A" }}</td>
+                                <td>{{ result.marks_obtained|default:0 }}/{{ result.exam.total_marks|default:0 }}</td>
+                                <td><span class="badge bg-{{ result.grade|lower|default:'secondary' }}">{{ result.grade|default:"N/A" }}</span></td>
+                                <td>{{ result.exam.date|date:"M d, Y"|default:"N/A" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end">
+                    <a href="{% url 'exam_results' student.id %}" class="btn btn-outline-primary">View All Results</a>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No exam results available yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

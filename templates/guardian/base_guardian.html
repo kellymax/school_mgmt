@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Guardian Portal - {{ block.super }}{% endblock %}
+
+{% block sidebar %}
+<div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+    <div class="position-sticky pt-3">
+        <div class="text-center mb-4">
+            <h5>Guardian Portal</h5>
+            <p class="text-muted small mb-0">{{ user.get_full_name|default:user.username }}</p>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'guardian_dashboard' %}active{% endif %}" 
+                   href="{% url 'guardian_dashboard' %}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            
+            {% if guardian_students %}
+            <li class="nav-item mt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 mb-1 text-muted">
+                    <span>My Students</span>
+                </h6>
+            </li>
+            
+            {% for student in guardian_students %}
+            <li class="nav-item">
+                <a class="nav-link {% if student.id == student_id|add:0 %}active{% endif %}" 
+                   href="{% url 'student_detail' student.id %}">
+                    <i class="fas fa-user-graduate me-2"></i>{{ student.user.get_full_name|default:student.user.username }}
+                </a>
+                
+                <!-- Student submenu -->
+                <ul class="nav flex-column ms-4">
+                    <li class="nav-item">
+                        <a class="nav-link small py-1" 
+                           href="{% url 'attendance_history' student.id %}">
+                            <i class="far fa-calendar-check me-1"></i>Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link small py-1" 
+                           href="{% url 'exam_results' student.id %}">
+                            <i class="fas fa-chart-line me-1"></i>Exam Results
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link small py-1" 
+                           href="{% url 'fee_payments' student.id %}">
+                            <i class="fas fa-money-bill-wave me-1"></i>Fee Payments
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            {% endfor %}
+            {% endif %}
+            
+            <li class="nav-item mt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 mb-1 text-muted">
+                    <span>Account</span>
+                </h6>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'profile' %}">
+                    <i class="fas fa-user me-2"></i>My Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'password_change' %}">
+                    <i class="fas fa-key me-2"></i>Change Password
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    {% block breadcrumb %}
+                    <li class="breadcrumb-item"><a href="{% url 'guardian_dashboard' %}">Guardian Dashboard</a></li>
+                    {% endblock %}
+                </ol>
+            </nav>
+            
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% block guardian_content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+    .recent-activities {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .table {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h4>Total Students</h4>
+                <div class="stat-number">{{ total_students }}</div>
+                <i class="bi bi-people-fill"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h4>Total Staff</h4>
+                <div class="stat-number">{{ total_staff }}</div>
+                <i class="bi bi-people-fill"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h4>Pending Fees</h4>
+                <div class="stat-number">{{ pending_fees }}</div>
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h4>Recent Exams</h4>
+                <div class="stat-number">{{ recent_exams|length }}</div>
+                <i class="bi bi-journal-text"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Exams</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Exam Name</th>
+                                    <th>Class</th>
+                                    <th>Date</th>
+                                    <th>Subject</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exam in recent_exams %}
+                                <tr>
+                                    <td>{{ exam.name }}</td>
+                                    <td>{{ exam.class_level }}</td>
+                                    <td>{{ exam.date }}</td>
+                                    <td>{{ exam.subject }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'register_student' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-plus"></i> Register Student
+                        </a>
+                        <a href="{% url 'register_staff' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-workspace"></i> Register Staff
+                        </a>
+                        <a href="{% url 'create_exam' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-journal-text"></i> Create Exam
+                        </a>
+                        <a href="{% url 'create_fee_structure' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-currency-dollar"></i> Create Fee Structure
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

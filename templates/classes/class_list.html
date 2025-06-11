@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classes - School Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Classes</h1>
+        <a href="{% url 'create_class' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Class
+        </a>
+    </div>
+
+    <!-- Classes Grid -->
+    <div class="row">
+        {% for class in classes %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ class.name }}</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                id="classActions{{ class.id }}" data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="classActions{{ class.id }}">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'class_detail' class_id=class.id %}">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'edit_class' class_id=class.id %}">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" 
+                                   onclick="return confirmDelete('{% url 'delete_class' class_id=class.id %}', '{{ class.name }}')">
+                                    <i class="fas fa-trash-alt me-2"></i>Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">{{ class.description|default:"No description provided."|truncatechars:120 }}</p>
+                    <div class="d-flex justify-content-between text-muted small mb-3">
+                        <div>
+                            <i class="fas fa-users me-1"></i>
+                            {{ class.student_set.count }} Students
+                        </div>
+                        <div>
+                            <i class="fas fa-chalkboard-teacher me-1"></i>
+                            {{ class.teachers.count }} Teachers
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: 75%;" aria-valuenow="75" 
+                             aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'class_detail' class_id=class.id %}" class="btn btn-sm btn-outline-primary">
+                            View Class
+                        </a>
+                        <a href="{% url 'mark_attendance' class_id=class.id %}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-clipboard-check"></i> Attendance
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center p-5 border rounded bg-light">
+                <i class="fas fa-school fa-3x text-muted mb-3"></i>
+                <h4>No Classes Found</h4>
+                <p class="text-muted">Get started by adding your first class.</p>
+                <a href="{% url 'create_class' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Class
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(url, className) {
+    if (confirm(`Are you sure you want to delete the class "${className}"? This action cannot be undone.`)) {
+        window.location.href = url;
+    }
+    return false;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize any JavaScript components here if needed
+});
+</script>
+{% endblock %}

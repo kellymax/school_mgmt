@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .attendance-header {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+    }
+    .attendance-status {
+        margin-bottom: 0.5rem;
+    }
+    .attendance-status input[type="radio"] {
+        margin-right: 0.5rem;
+    }
+    .attendance-submit {
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="attendance-card">
+                <div class="attendance-header">
+                    <h5 class="mb-0">Mark Attendance for {{ class.name }}</h5>
+                    <p class="mb-0">Date: {{ date }}</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Attendance Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr>
+                                        <td>{{ student.get_full_name }}</td>
+                                        <td>
+                                            <div class="attendance-status">
+                                                <input type="radio" name="status_{{ student.id }}" value="present" required>
+                                                <label>Present</label>
+                                                <input type="radio" name="status_{{ student.id }}" value="absent">
+                                                <label>Absent</label>
+                                                <input type="radio" name="status_{{ student.id }}" value="late">
+                                                <label>Late</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="attendance-submit">
+                            <button type="submit" class="btn btn-primary">Save Attendance</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Summary -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Attendance Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Late</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for summary in attendance_summary %}
+                                <tr>
+                                    <td>{{ summary.date }}</td>
+                                    <td>{{ summary.present }}</td>
+                                    <td>{{ summary.absent }}</td>
+                                    <td>{{ summary.late }}</td>
+                                    <td>{{ summary.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on first radio button
+    document.querySelector('input[type="radio"]').focus();
+
+    // Form validation
+    const forms = document.querySelectorAll('form');
+    Array.from(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            // Check if all students have attendance marked
+            const radioGroups = document.querySelectorAll('input[type="radio"]:checked');
+            const requiredCount = parseInt('{{ students|length }}');
+            const checkedCount = radioGroups.length;
+
+            if (checkedCount !== requiredCount) {
+                event.preventDefault();
+                alert('Please mark attendance for all students');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

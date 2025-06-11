@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .summary-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .attendance-stats {
+        background: linear-gradient(to right, #007b5e, #82b74b);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+    .attendance-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+    }
+    .badge-present { background-color: #28a745; color: white; }
+    .badge-absent { background-color: #dc3545; color: white; }
+    .badge-late { background-color: #ffc107; color: black; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Class Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="attendance-stats">
+                <h4>{{ class.name }}</h4>
+                <p class="mb-0">
+                    <span class="badge bg-light text-dark">Total Days: {{ total_days }}</span>
+                    <span class="badge bg-light text-dark">Month: {{ current_month }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Average Attendance</h5>
+                <div class="stats-number">{{ average_attendance|floatformat:1 }}%</div>
+                <p class="mb-0">Class Average</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Best Attendance</h5>
+                <div class="stats-number">{{ best_attendance|floatformat:1 }}%</div>
+                <p class="mb-0">{{ best_student.get_full_name }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Lowest Attendance</h5>
+                <div class="stats-number">{{ lowest_attendance|floatformat:1 }}%</div>
+                <p class="mb-0">{{ lowest_student.get_full_name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Attendance Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="summary-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Student Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Late</th>
+                                    <th>Total Days</th>
+                                    <th>Attendance %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in attendance_summary %}
+                                <tr>
+                                    <td>{{ student.student.get_full_name }}</td>
+                                    <td>{{ student.present }}</td>
+                                    <td>{{ student.absent }}</td>
+                                    <td>{{ student.late }}</td>
+                                    <td>{{ student.total }}</td>
+                                    <td>{{ student.attendance_percentage|floatformat:1 }}%</td>
+                                    <td>
+                                        {% if student.attendance_percentage >= 90 %}
+                                            <span class="attendance-badge badge-present">Excellent</span>
+                                        {% elif student.attendance_percentage >= 75 %}
+                                            <span class="attendance-badge badge-late">Good</span>
+                                        {% else %}
+                                            <span class="attendance-badge badge-absent">Needs Improvement</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add tooltips for attendance badges
+    const attendanceBadges = document.querySelectorAll('.attendance-badge');
+    attendanceBadges.forEach(badge => {
+        new bootstrap.Tooltip(badge, {
+            title: badge.textContent,
+            placement: 'top'
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'guardian/base_guardian.html' %}
+
+{% block title %}Add Guardian - {{ student.user.get_full_name }}{% endblock %}
+
+{% block breadcrumb %}
+{{ block.super }}
+<li class="breadcrumb-item"><a href="{% url 'student_detail' student.id %}">{{ student.user.get_short_name }}</a></li>
+<li class="breadcrumb-item active">Add Guardian</li>
+{% endblock %}
+
+{% block guardian_content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Add Guardian for {{ student.user.get_full_name }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row">
+                <!-- Personal Information -->
+                <div class="col-md-6">
+                    <h6 class="mb-3">Personal Information</h6>
+                    
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name *</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               value="{{ form_data.first_name|default:"" }}" required>
+                        <div class="invalid-feedback">Please enter the first name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Last Name *</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               value="{{ form_data.last_name|default:"" }}" required>
+                        <div class="invalid-feedback">Please enter the last name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ form_data.email|default:"" }}" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ form_data.phone|default:"" }}" required>
+                        <div class="invalid-feedback">Please enter a phone number.</div>
+                    </div>
+                </div>
+                
+                <!-- Additional Information -->
+                <div class="col-md-6">
+                    <h6 class="mb-3">Additional Information</h6>
+                    
+                    <div class="mb-3">
+                        <label for="relationship" class="form-label">Relationship *</label>
+                        <select class="form-select" id="relationship" name="relationship" required>
+                            <option value="">Select relationship...</option>
+                            <option value="father" {% if form_data.relationship == 'father' %}selected{% endif %}>Father</option>
+                            <option value="mother" {% if form_data.relationship == 'mother' %}selected{% endif %}>Mother</option>
+                            <option value="brother" {% if form_data.relationship == 'brother' %}selected{% endif %}>Brother</option>
+                            <option value="sister" {% if form_data.relationship == 'sister' %}selected{% endif %}>Sister</option>
+                            <option value="grandfather" {% if form_data.relationship == 'grandfather' %}selected{% endif %}>Grandfather</option>
+                            <option value="grandmother" {% if form_data.relationship == 'grandmother' %}selected{% endif %}>Grandmother</option>
+                            <option value="uncle" {% if form_data.relationship == 'uncle' %}selected{% endif %}>Uncle</option>
+                            <option value="aunt" {% if form_data.relationship == 'aunt' %}selected{% endif %}>Aunt</option>
+                            <option value="other" {% if form_data.relationship == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a relationship.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3">{{ form_data.address|default:"" }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="profession" class="form-label">Profession</label>
+                        <input type="text" class="form-control" id="profession" name="profession" 
+                               value="{{ form_data.profession|default:"" }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ form_data.notes|default:"" }}</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Add Guardian
+                </button>
+                <a href="{% url 'student_detail' student.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}

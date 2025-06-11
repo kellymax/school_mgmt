@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Management System - Register</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Page Background */
+    body {
+      background: linear-gradient(to right, #007b5e, #82b74b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    /* Register Card */
+    .register-card {
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      border-radius: 10px;
+      background-color: #ffffff;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    /* Logo and Header */
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #007b5e;
+      margin-bottom: 1rem;
+    }
+
+    .register-header {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #555555;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Form Controls */
+    .form-control {
+      border-radius: 25px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: 1px solid #82b74b;
+    }
+
+    /* Register Button */
+    .btn-primary {
+      width: 100%;
+      border-radius: 25px;
+      padding: 0.75rem;
+      font-size: 1.1rem;
+      background-color: #007b5e;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+      background-color: #004d3d;
+    }
+
+    /* Links */
+    .login-link {
+      font-size: 0.9rem;
+      color: #007b5e;
+    }
+    .login-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Error Messages */
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <!-- Logo and Header -->
+    <div class="logo">School Management System</div>
+    <h2 class="register-header">Create Account</h2>
+
+    <form method="POST" action="{% url 'register' %}" class="needs-validation" novalidate>
+      {% csrf_token %}
+      
+      {% if error_message %}
+        <div class="alert alert-danger">
+          {{ error_message }}
+        </div>
+      {% endif %}
+      
+      <div class="row">
+        <!-- First Name -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" 
+                   value="{{ form_data.first_name|default:'' }}" required>
+          </div>
+        </div>
+        
+        <!-- Last Name -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" 
+                   value="{{ form_data.last_name|default:'' }}" required>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" id="username" name="username" 
+               value="{{ form_data.username|default:'' }}" required>
+        <small class="form-text text-muted">Choose a unique username</small>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" name="email" 
+               value="{{ form_data.email|default:'' }}" required>
+      </div>
+      
+      <!-- Phone -->
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" class="form-control" id="phone" name="phone" 
+               value="{{ form_data.phone|default:'' }}" required>
+      </div>
+      
+      <!-- Role -->
+      <div class="form-group">
+        <label for="role">I am a</label>
+        <select class="form-control" id="role" name="role" required>
+          {% for value, label in role_choices %}
+            <option value="{{ value }}" {% if form_data.role == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row">
+        <!-- Password -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="password1">Password</label>
+            <input type="password" class="form-control" id="password1" name="password1" required
+                   minlength="8" data-toggle="tooltip" 
+                   title="Password must be at least 8 characters long">
+            <small class="form-text text-muted">At least 8 characters</small>
+          </div>
+        </div>
+        
+        <!-- Confirm Password -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="password2">Confirm Password</label>
+            <input type="password" class="form-control" id="password2" name="password2" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Button -->
+      <button type="submit" class="btn btn-primary">Register</button>
+
+      <!-- Login Link -->
+      <div class="text-center mt-3">
+        <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="login-link">Login</a></p>
+      </div>
+    </form>
+
+    <!-- Display messages (errors, success, etc.) -->
+    {% if messages %}
+      <div class="alert alert-danger">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Bootstrap JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script>
+    $(document).ready(function() {
+      // Enable tooltips
+      $('[data-toggle="tooltip"]').tooltip();
+      
+      // Form validation
+      $('form').on('submit', function(e) {
+        // Clear previous error states
+        $('.is-invalid').removeClass('is-invalid');
+        
+        // Check required fields
+        let isValid = true;
+        $('[required]').each(function() {
+          if (!$(this).val().trim()) {
+            $(this).addClass('is-invalid');
+            isValid = false;
+          }
+        });
+        
+        // Check password match
+        const password1 = $('#password1').val();
+        const password2 = $('#password2').val();
+        if (password1 !== password2) {
+          $('#password1, #password2').addClass('is-invalid');
+          $('#password2').after('<div class="invalid-feedback">Passwords do not match</div>');
+          isValid = false;
+        }
+        
+        // Check password length
+        if (password1.length < 8) {
+          $('#password1').addClass('is-invalid');
+          $('#password1').after('<div class="invalid-feedback">Password must be at least 8 characters long</div>');
+          isValid = false;
+        }
+        
+        // Check email format
+        const email = $('#email').val();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email && !emailRegex.test(email)) {
+          $('#email').addClass('is-invalid');
+          $('#email').after('<div class="invalid-feedback">Please enter a valid email address</div>');
+          isValid = false;
+        }
+        
+        // Check phone number format (basic validation)
+        const phone = $('#phone').val();
+        const phoneRegex = /^[0-9\-\+\(\)\s]{10,20}$/;
+        if (phone && !phoneRegex.test(phone)) {
+          $('#phone').addClass('is-invalid');
+          $('#phone').after('<div class="invalid-feedback">Please enter a valid phone number</div>');
+          isValid = false;
+        }
+        
+        if (!isValid) {
+          e.preventDefault();
+          $('html, body').animate({
+            scrollTop: $('.is-invalid').first().offset().top - 100
+          }, 500);
+        }
+      });
+      
+      // Real-time validation
+      $('input, select').on('input change', function() {
+        if ($(this).val()) {
+          $(this).removeClass('is-invalid');
+          $(this).next('.invalid-feedback').remove();
+        }
+      });
+    });
+  </script>
+  
+  <style>
+    .is-invalid {
+      border-color: #dc3545;
+    }
+    .invalid-feedback {
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 80%;
+      color: #dc3545;
+    }
+  </style>
+</body>
+</html>

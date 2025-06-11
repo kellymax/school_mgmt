@@ -1,0 +1,185 @@
+{% extends 'guardian/base_guardian.html' %}
+
+{% block title %}Guardian Dashboard{% endblock %}
+
+{% block breadcrumb %}
+{{ block.super }}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block guardian_content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Welcome, {{ guardian.user.get_full_name|default:guardian.user.username }}</h5>
+                <p class="card-text">
+                    You are the {{ guardian.get_relationship_display|lower }} of {{ students.count }} student{{ students.count|pluralize }}.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if students %}
+<div class="row">
+    <!-- Students Summary -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0">My Students</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for student in students %}
+                    <a href="{% url 'student_detail' student.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ student.user.get_full_name|default:student.user.username }}</h6>
+                            <small>ID: {{ student.student_id }}</small>
+                        </div>
+                        <p class="mb-1">
+                            Class: {{ student.current_class.name|default:"Not assigned" }}
+                        </p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Exams -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Upcoming Exams</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_exams %}
+                <div class="list-group list-group-flush">
+                    {% for result in upcoming_exams %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ result.exam.name }}</h6>
+                            <small class="text-muted">{{ result.exam.date|date:"M d, Y" }}</small>
+                        </div>
+                        <p class="mb-1 small">
+                            {{ result.exam.subject.name }} - {{ result.exam.get_exam_type_display }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ result.student.user.get_short_name }}</small>
+                            <span class="badge bg-info">{{ result.exam.class_level.name }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No upcoming exams found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Attendance -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Recent Attendance</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_attendance %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Student</th>
+                                <th>Status</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendance in recent_attendance %}
+                            <tr>
+                                <td>{{ attendance.date|date:"M d, Y" }}</td>
+                                <td>{{ attendance.student.user.get_short_name }}</td>
+                                <td>
+                                    <span class="badge {% if attendance.status == 'present' %}bg-success{% elif attendance.status == 'late' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ attendance.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ attendance.class_level.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-check fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No attendance records found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fee Dues -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Fee Dues</h6>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if fee_dues %}
+                <div class="list-group list-group-flush">
+                    {% for fee in fee_dues %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ fee.fee_structure.name }}</h6>
+                            <span class="badge {% if fee.status == 'paid' %}bg-success{% elif fee.status == 'partial' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ fee.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="mb-1 small">
+                            {{ fee.student.user.get_short_name }} - {{ fee.fee_structure.class_level.name }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Due: {{ fee.due_date|date:"M d, Y" }}</small>
+                            <span class="fw-bold">KSh {{ fee.amount|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p class="text-muted">No pending fee dues.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-graduate fa-4x text-muted mb-4"></i>
+                <h4>No Students Assigned</h4>
+                <p class="text-muted">You don't have any students assigned to your account yet.</p>
+                <p>Please contact the school administration if you believe this is an error.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
