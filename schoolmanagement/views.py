@@ -330,27 +330,45 @@ def register_view(request):
 
 
 def login_view(request):
+    """
+    Custom login view that supports multiple login methods:
+    - Username
+    - Email
+    - Student Admission Number
+    - Staff Number
+    - Guardian Number
+    """
     if request.user.is_authenticated:
         return redirect('schoolmanagement:dashboard')
         
     error_message = None
     if request.method == 'POST':
         try:
-            username = request.POST.get('username')
+            identifier = request.POST.get('username', '').strip()
             password = request.POST.get('password')
             
-            if not (username and password):
-                raise ValidationError('Both username and password are required')
-                
-            user = authenticate(request, username=username, password=password)
+            if not (identifier and password):
+                raise ValidationError('Both username/ID and password are required')
+            
+            # Authenticate the user using our custom backend
+            user = authenticate(request, username=identifier, password=password)
             
             if user is not None:
                 auth_login(request, user)
-                messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                
+                # Set session expiry to 24 hours (optional)
+                if not request.POST.get('remember_me'):
+                    request.session.set_expiry(60 * 60 * 24)  # 24 hours
+                
+                # Welcome message with user's full name if available
+                welcome_name = user.get_full_name() or user.username
+                messages.success(request, f'Welcome back, {welcome_name}!')
+                
+                # Redirect to next URL if provided, otherwise to dashboard
                 next_url = request.GET.get('next', 'schoolmanagement:dashboard')
                 return redirect(next_url)
             else:
-                raise ValidationError('Invalid username or password')
+                raise ValidationError('Invalid login credentials. Please try again.')
                 
         except ValidationError as e:
             error_message = str(e)
