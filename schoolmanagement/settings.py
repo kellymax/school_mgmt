@@ -32,7 +32,8 @@ INSTALLED_APPS = [
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'schoolmanagement.backends.CustomAuthBackend',  # Our custom authentication backend
+    'django.contrib.auth.backends.ModelBackend',   # Default authentication backend
 ]
 
 MIDDLEWARE = [
