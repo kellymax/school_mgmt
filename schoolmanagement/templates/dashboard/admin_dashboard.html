@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - School Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Admin Dashboard</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Students</h5>
+                                <p class="display-4">{{ total_students }}</p>
+                                <a href="#" class="btn btn-light">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Staff</h5>
+                                <p class="display-4">{{ total_staff }}</p>
+                                <a href="#" class="btn btn-light">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Pending Fees</h5>
+                                <p class="display-4">{{ pending_fees }}</p>
+                                <a href="#" class="btn btn-light">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Recent Exams</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    {% for exam in recent_exams %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ exam.name }}</h6>
+                                            <small>{{ exam.date|date:"M d, Y" }}</small>
+                                        </div>
+                                        <small>Class: {{ exam.class_level.name }}</small>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-muted">No recent exams found.</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

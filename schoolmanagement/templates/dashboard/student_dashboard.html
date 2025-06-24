@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - School Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Welcome, {{ student.user.get_full_name|default:student.user.username }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">My Classes</h5>
+                                <ul class="list-group">
+                                    {% for class in classes %}
+                                    <li class="list-group-item">{{ class.name }}</li>
+                                    {% empty %}
+                                    <li class="list-group-item">No classes assigned</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Recent Exams</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_exams %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Exam</th>
+                                                <th>Class</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for exam in recent_exams %}
+                                            <tr>
+                                                <td>{{ exam.name }}</td>
+                                                <td>{{ exam.class_level.name }}</td>
+                                                <td>{{ exam.date|date:"M d, Y" }}</td>
+                                                <td><span class="badge bg-primary">Upcoming</span></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted">No upcoming exams found.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if upcoming_fees %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-warning">
+                                <h5 class="mb-0">Upcoming Fee Payments</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fee Type</th>
+                                                <th>Amount</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for fee in upcoming_fees %}
+                                            <tr>
+                                                <td>{{ fee.fee_type }}</td>
+                                                <td>${{ fee.amount }}</td>
+                                                <td>{{ fee.due_date|date:"M d, Y" }}</td>
+                                                <td><span class="badge bg-warning">Pending</span></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
